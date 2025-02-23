@@ -24,6 +24,7 @@ pub trait TestAgent: Send + Sync {
         &self,
         read_timeout: u64,
         port: &str,
+        process_id: Option<i32>,
     ) -> Result<Vec<Vec<u8>>, std::io::Error> {
         unimplemented!("Must be implemented by the type")
     }
@@ -231,6 +232,7 @@ impl Test {
                     .block_on(self.test.communicate(
                         self.communicator_timeout,
                         &self.port.to_string(),
+                        test_proc.id(),
                     ))
                     .unwrap_or_else(|e| vec![e.to_string().into_bytes()]);
 

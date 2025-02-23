@@ -96,6 +96,15 @@ impl TestSpawner {
 }
 
 impl TestSpawner {
+    pub fn id(&self) -> Option<i32> {
+        match self.child.id() {
+            Some(pid) => Some(pid as i32),
+            None => None,
+        }
+    }
+}
+
+impl TestSpawner {
     pub async fn wait(&mut self, finish_timeout: u64) -> ProcessOutput {
         let secs = tokio::time::Duration::from_secs(finish_timeout);
         let result = tokio::time::timeout(secs, async {
