@@ -195,37 +195,6 @@ pub fn compile(input: &str, cwd: &std::path::PathBuf) -> String {
     String::from("success")
 }
 
-pub fn log_exit_code(exit_code: &ExitStatus) -> bool {
-    if exit_code.success() {
-        return true;
-    }
-
-    let mut success = true;
-    match &exit_code.code() {
-        Some(code) => {
-            if *code == Status::Timeout as i32 {
-                println!("[-] Test timed out");
-                success = false;
-            } else if *code == Status::Sigsegv as i32 {
-                println!("[-] Test crashed with SIGSEGV");
-                success = false;
-            } else if *code == Status::Sigabrt as i32 {
-                println!("[-] Test crashed with SIGABRT");
-                success = false;
-            } else {
-                if *code != 1 {
-                    println!("[!] Test exited with status code: {}", code);
-                }
-            }
-        }
-        None => {
-            println!("[-] Test exited with unknown status code");
-            success = false;
-        }
-    }
-    success
-}
-
 pub fn check_valgrind_leaks(log_path: &std::path::PathBuf) -> bool {
     let log_contents = match std::fs::read_to_string(log_path) {
         Ok(contents) => contents,
