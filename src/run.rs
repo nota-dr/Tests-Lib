@@ -199,7 +199,8 @@ pub fn check_valgrind_leaks(log_path: &std::path::PathBuf) -> bool {
     let log_contents = match std::fs::read_to_string(log_path) {
         Ok(contents) => contents,
         Err(_) => {
-            panic!("[-] Failed to read valgrind log file");
+            println!("[-] Failed to read valgrind log file");
+            return false;
         }
     };
 
