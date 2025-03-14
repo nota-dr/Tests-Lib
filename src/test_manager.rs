@@ -360,15 +360,17 @@ impl Test {
             );
         }
 
-        // validate output
-        if !self.on_validate(&test_output) {
-            return false;
-        }
+        let is_not_errored = self.on_validate(&test_output);
+        let is_confirmed = self.test.validate(
+            &self.cmd_args,
+            communicate_output,
+            test_output,
+            cwd,
+        ).await;
         
         println!();
-        self.test
-            .validate(&self.cmd_args, communicate_output, test_output, cwd)
-            .await
+
+        is_not_errored && is_confirmed
     }
 }
 
