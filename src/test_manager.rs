@@ -215,7 +215,8 @@ impl Test {
         // panic if exercise failed to run due port already in use
         let stderr =
             String::from_utf8_lossy(&test_output.stderr).to_lowercase();
-        if stderr.contains("in use") // address already in use
+        if stderr.contains("in use")
+        // address already in use
         {
             // panic!(
             //     "[-] Failed to run test: {}",
@@ -226,38 +227,34 @@ impl Test {
         }
 
         match &test_output.status {
-            Ok(ref status) => {
+            Ok(ref status) => match status.code() {
+                Some(code) => {
+                    if code == 0 || code == 1 {
+                        return true;
+                    }
 
-                match status.code() {
-                    Some(code) => {
-                        if code == 0 || code == 1 {
-                            return true;
-                        }
+                    if code == Status::Timeout as i32 {
+                        println!("[-] Test timed out");
+                        return false;
+                    }
 
-                        if code == Status::Timeout as i32 {
-                            println!("[-] Test timed out");
-                            return false;
-                        }
-
-                        println!("[!] Test exited with status code: {}", code);
-                    },
-                    None => {
-                        let signal_code = status.signal().unwrap();
-                        if signal_code == libc::SIGSEGV {
-                            println!(
+                    println!("[!] Test exited with status code: {}", code);
+                }
+                None => {
+                    let signal_code = status.signal().unwrap();
+                    if signal_code == libc::SIGSEGV {
+                        println!(
                                 "[-] Test crashed with SIGSEGV  (segmentation fault)"
                             );
-                            return false;
-                        }
-
-                        else if signal_code == libc::SIGABRT {
-                            println!("[-] Test crashed with SIGABRT (core dumped)");
-                            return false;
-                        }
-
-                        else {
-                            println!("[!] Test exited with signal code: {}", signal_code);
-                        }
+                        return false;
+                    } else if signal_code == libc::SIGABRT {
+                        println!("[-] Test crashed with SIGABRT (core dumped)");
+                        return false;
+                    } else {
+                        println!(
+                            "[!] Test exited with signal code: {}",
+                            signal_code
+                        );
                     }
                 }
             },
@@ -361,13 +358,11 @@ impl Test {
         }
 
         let is_not_errored = self.on_validate(&test_output);
-        let is_confirmed = self.test.validate(
-            &self.cmd_args,
-            communicate_output,
-            test_output,
-            cwd,
-        ).await;
-        
+        let is_confirmed = self
+            .test
+            .validate(&self.cmd_args, communicate_output, test_output, cwd)
+            .await;
+
         println!();
 
         is_not_errored && is_confirmed
