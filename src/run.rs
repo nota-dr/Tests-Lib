@@ -174,7 +174,7 @@ pub fn compile(input: &str, cwd: &std::path::PathBuf) -> String {
         .write_all(&output.stderr)
         .expect("[-] Failed to write to compilation log file");
 
-    let needle = b"error";
+    let needle = b"error:";
     if let Some(_) = output
         .stderr
         .windows(needle.len())
